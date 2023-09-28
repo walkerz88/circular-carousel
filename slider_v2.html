@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="slider js-circularSlider">
+            <div class="card">
+                <img src="./js-logo.svg" alt="JavaScript" />
+            </div>
+            <div class="card">
+                <img src="./css.svg" alt="CSS" />
+            </div>
+            <div class="card">3</div>
+            <div class="card">4</div>
+            <div class="card">5</div>
+            <div class="card">6</div>
+            <div class="card">7</div>
+            <div class="card">8</div>
+            <div class="card">9</div>
+            <div class="card">10</div>
+            <div class="card">11</div>
+            <div class="card">12</div>
+            <div class="card">13</div>
+            <div class="card">14</div>
+            <div class="card">15</div>
+            <div class="card">16</div>
+            <div class="card">17</div>
+            <div class="card">18</div>
+            <div class="card">19</div>
+            <div class="card">20</div>
+        </div>
+        <div class="slider__controls">
+            <button class="js-prev">Prev</button>
+            <button class="slider__button" data-index="0">1</button>
+            <button class="slider__button" data-index="1">2</button>
+            <button class="slider__button" data-index="2">3</button>
+            <button class="slider__button" data-index="3">4</button>
+            <button class="slider__button" data-index="4">5</button>
+            <button class="slider__button" data-index="5">6</button>
+            <button class="slider__button" data-index="6">7</button>
+            <button class="slider__button" data-index="7">8</button>
+            <button class="slider__button" data-index="8">9</button>
+            <button class="slider__button" data-index="9">10</button>
+            <button class="slider__button" data-index="10">11</button>
+            <button class="slider__button" data-index="11">12</button>
+            <button class="slider__button" data-index="12">13</button>
+            <button class="slider__button" data-index="13">14</button>
+            <button class="slider__button" data-index="14">15</button>
+            <button class="slider__button" data-index="15">16</button>
+            <button class="slider__button" data-index="16">17</button>
+            <button class="slider__button" data-index="17">18</button>
+            <button class="slider__button" data-index="18">19</button>
+            <button class="slider__button" data-index="19">20</button>
+            <button class="js-next">Next</button>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    .wrapper {
+        width: 100%;
+        max-width: 1024px;
+        padding: 0 16px;
+        margin: 0 auto;
+    }
+
+    .slider {
+        width: 100%;
+        height: 400px;
+        background-color: #ff9837;
+        border-radius: 16px;
+    }
+
+    .card {
+        width: 100%;
+        height: 100%;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 42px;
+        font-weight: 600;
+    }
+
+    .card img {
+        max-width: 200px;
+        margin-bottom: 8px;
+    }
+</style>
+
+<script>
+    class Slider {
+        constructor(options) {
+            const defaultOptions = { querySelector: '.js-circularSlider', speed: 800 }
+
+            this.options = { ...defaultOptions, options }
+            this.currentIndex = 0
+            this.currentAngle = 0
+            this.$target = document.querySelector(this.options.querySelector)
+            this.sliderHeight = this.$target.offsetHeight
+            this.items = []
+        }
+
+        init() {
+            const { $target, options: { speed } } = this
+            const $initSlides = $target.children
+            const itemsArray = [...$initSlides]
+            const height = $target.offsetHeight
+            const containerSize = height * 3
+            const wrapperStyles = {
+                position: 'relative',
+                width: '100%',
+                height: '100%',
+                overflow: 'hidden'
+            }
+            const containerStyles = {
+                position: 'absolute',
+                top: 0,
+                left: '50%',
+                width: `${containerSize}px`,
+                height: `${containerSize}px`,
+                transform: 'translateX(-50%) rotate(90deg)',
+                transition: `transform ${speed}ms ease-in-out`,
+                display: 'none'
+            }
+            const itemStyles = {
+                position: 'absolute',
+                top: '0',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: `${height}px`,
+                height: `${height}px`
+            }
+            const $wrapper = document.createElement('div')
+
+            $wrapper.classList.add('circular-slider')
+
+            Object.assign($wrapper.style, wrapperStyles);
+
+            this.items = itemsArray.map(($el, index) => {
+                const $container = document.createElement('div')
+                const $item = document.createElement('div')
+
+                $container.classList.add('circular-slider__container')
+                $item.classList.add('circular-slider__item')
+
+                Object.assign($item.style, itemStyles);
+                Object.assign($container.style, containerStyles);
+
+                if (index === 0) {
+                    Object.assign($container.style, {
+                        ...containerStyles,
+                        display: 'block',
+                        transform: 'translateX(-50%) rotate(0deg)'
+                    });
+                } else {
+                    Object.assign($container.style, containerStyles);
+                }
+
+                $item.append($el)
+                $container.append($item)
+
+                return $container
+            })
+
+            this.items.forEach($el => {
+                $wrapper.append($el)
+            })
+
+            $target.append($wrapper)
+        }
+
+        goTo(index) {
+            let nextIndex = index
+
+            if (index <= 0) {
+                nextIndex = 0
+            } else if (index >= this.items.length - 1) {
+                nextIndex = this.items.length - 1
+            }
+
+            if (nextIndex === this.currentIndex) {
+                return
+            }
+
+            const { speed } = this.options
+            const prevIndex = this.currentIndex
+            const $prevItem = this.items[prevIndex]
+            const $nextItem = this.items[nextIndex]
+            this.currentIndex = nextIndex
+
+            if (nextIndex > prevIndex) {
+                Object.assign($prevItem.style, {
+                    transform: `translateX(-50%) rotate(-90deg)`
+                })
+
+                Object.assign($nextItem.style, { transform: 'translateX(-50%) rotate(90deg)' })
+            } else {
+                Object.assign($prevItem.style, {
+                    transform: `translateX(-50%) rotate(90deg)`
+                })
+
+                Object.assign($nextItem.style, { transform: 'translateX(-50%) rotate(-90deg)' })
+            }
+
+            Object.assign($nextItem.style, { display: 'block' })
+
+            setTimeout(() => {
+                Object.assign($nextItem.style, { transform: 'translateX(-50%) rotate(0)' })
+            }, 0)
+
+            setTimeout(() => {
+                Object.assign($prevItem.style, { display: 'none' })
+            }, speed)
+        }
+
+        goNext() {
+            this.goTo(this.currentIndex + 1)
+        }
+
+        goPrevious() {
+            this.goTo(this.currentIndex - 1)
+        }
+    }
+
+    const mySlider = new Slider()
+
+    mySlider.init({ speed: 2000 })
+
+    document.querySelector('.js-prev').addEventListener('click', () => {
+        mySlider.goPrevious()
+    })
+
+    document.querySelector('.js-next').addEventListener('click', () => {
+        mySlider.goNext()
+    })
+
+    document.addEventListener('click', (e) => {
+        const el = e.target
+
+        if (el.classList.contains('slider__button')) {
+            const index = +el.dataset.index
+
+            mySlider.goTo(index)
+        }
+    })
+</script>
